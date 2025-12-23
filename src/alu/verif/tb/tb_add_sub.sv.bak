@@ -1,0 +1,86 @@
+`timescale 1ns/1ps
+
+module tb_add_sub;
+
+    // --- Signals for DUT connection ---
+    logic [31:0] a, b;
+    logic        carry_in, add_sub;
+    logic [31:0] sum_dif;
+    logic        C, V;
+
+    // --- Variables for self-checking ---
+    logic [31:0] expected_val;
+    int pass_count = 0;
+    int test_count = 0;
+
+    // --- Instantiate the Unit Under Test (DUT) ---
+    // Ensure the module name in add_sub.sv matches 'FA_32bits'
+    FA_32bits dut (.*);
+
+    // --- Automated Verification Task ---
+    task verify_case(input string test_name);
+        test_count++;
+        #10; // Wait for combinational logic settling
+        
+        // Calculate Expected Value using SV operators
+        if (add_sub == 0) 
+            expected_val = a + b + carry_in; // Standard addition
+        else 
+            expected_val = a - b; // Standard subtraction (2's complement)
+
+        // Compare and Display Result
+        if (sum_dif === expected_val) begin
+            $display("[PASS] %s | Expect: %h , Real: %h", test_name, expected_val, sum_dif);
+            pass_count++;
+        end else begin
+            $display("[FAIL] %s | Expect: %h , Real: %h | a=%h, b=%h, op=%b", 
+                      test_name, expected_val, sum_dif, a, b, add_sub);
+        end
+    endtask
+
+    initial begin
+        $display("---------------------------------------");
+        $display("--- STARTING ADD_SUB UNIT VERIFY ---");
+        $display("---------------------------------------");
+        
+        // --- ADDITION TESTS (add_sub = 0) ---
+        a = 32'h0000_0005; b = 32'h0000_000A; add_sub = 0; carry_in = 0; verify_case("TC_ADD_01");
+        a = 32'h0000_FFFF; b = 32'h0000_0001; add_sub = 0; carry_in = 0; verify_case("TC_ADD_02");
+        a = 32'h7FFF_FFFF; b = 32'h0000_0001; add_sub = 0; carry_in = 0; verify_case("TC_ADD_03_OVF");
+        a = 32'hFFFF_FFFF; b = 32'h0000_0001; add_sub = 0; carry_in = 0; verify_case("TC_ADD_04_CY");
+        a = 32'd500;       b = 32'd500;       add_sub = 0; carry_in = 1; verify_case("TC_ADD_05_CIN");
+
+        // --- SUBTRACTION TESTS (add_sub = 1, carry_in = 1) ---
+        a = 32'h0000_0014; b = 32'h0000_0006; add_sub = 1; carry_in = 1; verify_case("TC_SUB_06");
+        a = 32'h0000_000A; b = 32'h0000_0014; add_sub = 1; carry_in = 1; verify_case("TC_SUB_07_NEG");
+        a = 32'h0;         b = 32'h0;         add_sub = 1; carry_in = 1; verify_case("TC_SUB_08_ZERO");
+        a = 32'h8000_0000; b = 32'h0000_0001; add_sub = 1; carry_in = 1; verify_case("TC_SUB_09_MIN");
+        a = 32'hFFFF_FFFF; b = 32'hFFFF_FFFF; add_sub = 1; carry_in = 1; verify_case("TC_SUB_10_SAME");
+
+        // --- EDGE CASES ---
+        a = 32'hAAAA_AAAA; b = 32'h5555_5555; add_sub = 0; carry_in = 0; verify_case("TC_EDGE_11");
+        a = 32'h8000_0000; b = 32'h8000_0000; add_sub = 0; carry_in = 0; verify_case("TC_EDGE_12_OVF");
+        a = 32'h7FFF_FFFF; b = 32'h8000_0000; add_sub = 1; carry_in = 1; verify_case("TC_EDGE_13_SUB");
+        a = 32'h1234_5678; b = 32'h0000_0000; add_sub = 1; carry_in = 1; verify_case("TC_EDGE_14_ZERO");
+        a = 32'hFFFF_FFFF; b = 32'h0000_0000; add_sub = 0; carry_in = 1; verify_case("TC_EDGE_15_MAX");
+
+        // --- RANDOM-LIKE PATTERNS ---
+        a = 32'h5A5A_5A5A; b = 32'hA5A5_A5A5; add_sub = 0; carry_in = 0; verify_case("TC_PAT_16");
+        a = 32'hF0F0_F0F0; b = 32'h0F0F_0F0F; add_sub = 1; carry_in = 1; verify_case("TC_PAT_17");
+        a = 32'd123456;    b = 32'd654321;    add_sub = 0; carry_in = 0; verify_case("TC_PAT_18");
+        a = 32'd999999;    b = 32'd111111;    add_sub = 1; carry_in = 1; verify_case("TC_PAT_19");
+        a = 32'hDEAD_BEEF; b = 32'h0000_0001; add_sub = 0; carry_in = 0; verify_case("TC_PAT_20");
+
+        $display("---------------------------------------");
+        $display("FINAL RESULT: %0d/%0d cases passed.", pass_count, test_count);
+        $display("---------------------------------------");
+        
+        if (pass_count == test_count)
+            $display(">>> VERIFICATION SUCCESSFUL <<<");
+        else
+            $display(">>> VERIFICATION FAILED! Check logs above <<<");
+            
+        $finish;
+    end
+
+endmodule

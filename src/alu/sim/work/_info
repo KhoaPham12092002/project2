@@ -1,0 +1,111 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/users/khoa/project2/src/alu/sim
+vcarry_block_4bits
+Z1 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
+Z2 !s110 1766417181
+!i10b 1
+!s100 6WOo6VaeaaL<VGimHncV11
+Z3 !s11b Dg1SIo80bB@j0V0VzS_@n1
+IXE;40Hb]8hef^T2XFi=5M2
+Z4 VDg1SIo80bB@j0V0VzS_@n1
+S1
+R0
+Z5 w1766394831
+Z6 8../src/module_dau/add_sub.sv
+Z7 F../src/module_dau/add_sub.sv
+!i122 0
+L0 19 15
+Z8 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z9 !s108 1766417181.000000
+Z10 !s107 ../src/module_dau/add_sub.sv|
+Z11 !s90 -reportprogress|300|-sv|../src/module_dau/add_sub.sv|
+!i113 1
+o-sv
+Z12 tCvgOpt 0
+vfull_adder_1_bit
+R1
+R2
+!i10b 1
+!s100 ^KM5loFQS8F0hb4IR0JQj3
+R3
+I5X^g]mA^J?4]_95`a^PQ21
+R4
+S1
+R0
+R5
+R6
+R7
+!i122 0
+L0 6 11
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 1
+o-sv
+R12
+vi_adder
+R1
+R2
+!i10b 1
+!s100 WmfYACZE=NZf@E`cDAH5Q1
+R3
+IF0[o=6eleTb8C@NeDzIVU3
+R4
+S1
+R0
+R5
+R6
+R7
+!i122 0
+L0 36 42
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 1
+o-sv
+R12
+vtb_add_sub
+R1
+R2
+!i10b 1
+!s100 ai7b@KDAmLO7LhHWdW]ON1
+R3
+I`R7N]LZTJlA2cUIBJ<V0<3
+R4
+S1
+R0
+w1766397658
+8../verif/tb/tb_add_sub.sv
+F../verif/tb/tb_add_sub.sv
+!i122 1
+L0 3 84
+R8
+r1
+!s85 0
+31
+R9
+!s107 ../verif/tb/tb_add_sub.sv|
+!s90 -reportprogress|300|-sv|../verif/tb/tb_add_sub.sv|
+!i113 1
+o-sv
+R12
