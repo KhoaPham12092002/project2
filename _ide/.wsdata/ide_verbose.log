@@ -1,0 +1,207 @@
+2025-12-30 22:40:51 [debug] : --------------------------------------------------------------------------------- 
+2025-12-30 22:40:51 [debug] : C:\Users\Khoa\project2 
+2025-12-30 22:40:51 [debug] : --------------------------------------------------------------------------------- 
+2025-12-30 22:40:51 [debug] : [Logger] Previous user logs are stored in the file - C:\Users\Khoa\.Xilinx\Vitis\2025.1\logs\ide.log 
+2025-12-30 22:40:51 [debug] : [Logger] Previous debug logs are stored in the file - C:\Users\Khoa\.Xilinx\Vitis\2025.1\.wsdata\ide_verbose.log 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider]  updating the embedded templates on workspace event. 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] refresh requested. 
+2025-12-30 22:40:51 [debug] : Received event from notification service: ON_DID_UPDATE_WORKSPACE. 
+2025-12-30 22:40:51 [debug] : [Logger Client] log levelchanged to  {"0":"Info"}
+2025-12-30 22:40:51 [debug] : [Logger UI]  Update Log Level  called 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] common calling method requested. 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] Repositories model update requested. 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] Repositories model update completed. 
+2025-12-30 22:40:51 [debug] : [ProjectCache] fetching projects for project-cache 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] Templates model update requested. 
+2025-12-30 22:40:51 [debug] : [Repository Service] Executing method:getEmbeddedExampleTemplateTree from frontend. {"0":"request:"}
+2025-12-30 22:40:51 [debug] : [Repository Server] Executing method:getEmbeddedExampleTemplateTree with connection:(object). {"0":"request:","1":{"wrappers_":null,"arrayIndexOffset_":-1,"array":[],"pivot_":1.7976931348623157e+308,"convertedPrimitiveFields_":{}}}
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] Templates model update completed. 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] common calling method completed. 
+2025-12-30 22:40:51 [debug] : [Application Examples Provider] refresh completed. 
+2025-12-30 22:40:51 [debug] : [Logger UI]  Update Log Level success {"0":{"success":true,"error":""}}
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : created .gitignore file for the project C:\Users\Khoa\project2 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : Marking the target connection as default Local 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : Marking the target connection as default Linux Agent 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : Marking the target connection as default XRTServer 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : Marking the target connection as default LinuxEmulation 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : Marking the target connection as default QEMU 
+2025-12-30 22:40:51 [debug] : RIGEL SERVER 22:40:51 INFO  : updated workspace path: C:\Users\Khoa\project2 
+2025-12-30 22:40:51 [debug] : Received event from notification service: ON_DID_REFRESH_WORKSPACE_SUMMARIES. 
+2025-12-30 22:40:51 [debug] : Event posted using notification server in backend. {"0":{"wrappers_":{},"arrayIndexOffset_":-1,"array":["20278b74-3b34-479a-a27a-e292714b94a2",null,54,null,null,null,null,"refresh-summaries"],"pivot_":1.7976931348623157e+308,"convertedPrimitiveFields_":{}}}
+2025-12-30 22:40:51 [debug] : [ProjectDecorator] tree decoration updated 
+2025-12-30 22:40:51 [debug] : [ProjectCache] Project location updated to undefined 
+2025-12-30 22:40:51 [debug] : [ProjectDecorator] tree decoration updated 
+2025-12-30 22:40:51 [debug] : Received event from notification service: ON_STOP_ANALYSIS_PROGRESS. 
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.fireDidChangeContent - enter - {
+  "changes": [
+    {
+      "range": {
+        "startLineNumber": 1,
+        "startColumn": 1,
+        "endLineNumber": 1,
+        "endColumn": 1
+      },
+      "rangeLength": 0,
+      "text": "{\r\n    \"clangd.fallbackFlags\": []\r\n}",
+      "rangeOffset": 0,
+      "forceMoveMarkers": false
+    }
+  ],
+  "eol": "\r\n",
+  "isEolChange": false,
+  "versionId": 2,
+  "isUndoing": false,
+  "isRedoing": false,
+  "isFlush": false
+} {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.markAsDirty - enter {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.markAsDirty - exit {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.fireDidChangeContent - exit {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:40:51 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/_ide/settings.json"}
+2025-12-30 22:41:25 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/src/soc_top.sv"}
+2025-12-30 22:41:25 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/src/soc_top.sv"}
+2025-12-30 22:41:25 [debug] : [hosted-plugin: 17280] There is no document for breakpointinput:vs.editor.ICodeEditor%3A3 
+2025-12-30 22:41:32 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/README.md"}
+2025-12-30 22:41:32 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/README.md"}
+2025-12-30 22:41:32 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:32 [debug] : [hosted-plugin: 17280] There is no document for breakpointinput:vs.editor.ICodeEditor%3A5 
+2025-12-30 22:41:33 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:36 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/_ide/.peers.ini"}
+2025-12-30 22:41:36 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/_ide/.peers.ini"}
+2025-12-30 22:41:36 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:36 [debug] : [hosted-plugin: 17280] PLUGIN_HOST(17280): PluginManagerExtImpl/loadPlugin(C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\plugins\vitis-hls-verilog-vhdl-support-0.0.1\extension\lib\extension.js) 
+2025-12-30 22:41:36 [debug] : [hosted-plugin: 17280] calling activation function on amd.vitis-hls-verilog-vhdl-support 
+2025-12-30 22:41:37 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:37 [debug] : [hosted-plugin: 17280] There is no document for breakpointinput:vs.editor.ICodeEditor%3A7 
+2025-12-30 22:41:43 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/rv32m-multiplier-and-divider/mul.v"}
+2025-12-30 22:41:43 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/rv32m-multiplier-and-divider/mul.v"}
+2025-12-30 22:41:43 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:44 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:41:44 [debug] : [hosted-plugin: 17280] There is no document for breakpointinput:vs.editor.ICodeEditor%3A9 
+2025-12-30 22:42:04 [debug] : MonacoEditorModel.cancelSync {"0":"file:///c:/Users/Khoa/project2/rv32m-multiplier-and-divider/tb.v"}
+2025-12-30 22:42:04 [debug] : MonacoEditorModel.cancelSave {"0":"file:///c:/Users/Khoa/project2/rv32m-multiplier-and-divider/tb.v"}
+2025-12-30 22:42:04 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:42:04 [debug] : [hosted-plugin: 17280] There is no document for breakpointinput:vs.editor.ICodeEditor%3A11 
+2025-12-30 22:42:05 [debug] : [hosted-plugin: 17280] TextEditor is disposed! 
+2025-12-30 22:59:45 [debug] : Error: ENOENT: no such file or directory, open 'C:\Users\Khoa\project2\_ide\build.json'
+    at Object.readFileSync (node:fs:448:20)
+    at t.readFileSync (node:electron/js2c/node_init:2:9900)
+    at f.getConfigJson (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\main.js:1:188661)
+    at u.onRequest (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:52208)
+    at c.requestHandler (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:52027)
+    at c.handleRequest (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:47056)
+    at c.handleMessage (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:44958)
+    at C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:44592
+    at C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:15380
+    at s.invoke (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:15470)
+    at a.fire (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:17273)
+    at t.ChannelMultiplexer.handleData (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:40138)
+    at t.ChannelMultiplexer.handleMessage (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:39316)
+    at C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:38542
+    at C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:15380
+    at s.invoke (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\19.js:1:15470) 
+2025-12-30 23:01:13 [debug] : socked closed 
+2025-12-30 23:01:13 [debug] : closing connection for 1 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/localization-server'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/os'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/commands'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/keyboard'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/logger'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/messageService'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/ChannelCloseService'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/startup-workspace'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/rigel-workspace'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/remote-filesystem'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/envs'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/workspace'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/stopwatch'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/rigel-utils'. 
+2025-12-30 23:01:13 [debug] : [Rigel Utils Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/application'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/i18n'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/quickInput'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/project'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/component'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/feature-registry'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/debugger'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/debug'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/shell-terminal'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/quickPick'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/task'. 
+2025-12-30 23:01:13 [debug] : a client has disconnected - removed from list: 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/search'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hostedPlugin'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/plugin-ext'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/plugin-paths'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/vsx-environment'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/request-service'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/cli-preferences'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/server'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/repository'. 
+2025-12-30 23:01:13 [debug] : [Repository Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/program_flash'. 
+2025-12-30 23:01:13 [debug] : [Program Flash Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/build'. 
+2025-12-30 23:01:13 [debug] : [Build Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path 'services/rigel-backend-helper'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/aie'. 
+2025-12-30 23:01:13 [debug] : [AIE Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/analysis'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/notification'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/recent-summaries'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/platform'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/l1library/service'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/elf-reader'. 
+2025-12-30 23:01:13 [debug] : [Elf Reader Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/rigel_explorer'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/linker-script'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/rigel-logger'. 
+2025-12-30 23:01:13 [debug] : [Logger Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/vitis-hls'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/device'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/vcxx'. 
+2025-12-30 23:01:13 [debug] : [Rigel Vcxx Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/mini-browser-service'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/report'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/common/data/info'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/flow_navigator'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/common/file/service'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/dataflow/info'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/directive'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls_flow'. 
+2025-12-30 23:01:13 [debug] : [Hls Flow Server] Disposing objects in backend. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/project-utils'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/bootgen'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/cdo-utils'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/report-model'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/hls/wave/open'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/search-in-workspace'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/keyStore'. 
+2025-12-30 23:01:13 [debug] : Closing channel on service path '/services/languagePackService'. 
+2025-12-30 23:01:13 [debug] : Uncaught Exception:  {"0":"Error: spawn wmic.exe ENOENT"}
+2025-12-30 23:01:13 [debug] : Error: spawn wmic.exe ENOENT
+    at ChildProcess._handle.onexit (node:internal/child_process:286:19)
+    at onErrorNT (node:internal/child_process:484:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) 
+2025-12-30 23:01:13 [debug] : Uncaught Exception:  {"0":"TypeError: Cannot read properties of undefined (reading 'forEach')"}
+2025-12-30 23:01:13 [debug] : TypeError: Cannot read properties of undefined (reading 'forEach')
+    at Stream.<anonymous> (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:505721)
+    at Stream.emit (node:events:519:28)
+    at Stream.o (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2735199)
+    at Stream.emit (node:events:531:35)
+    at g (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2063454)
+    at r.write (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2063811)
+    at Stream.ondata (node:internal/streams/legacy:21:31)
+    at Stream.emit (node:events:519:28)
+    at c (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2784493)
+    at l.queue.l.push (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2784710)
+    at l (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2730257)
+    at Stream.<anonymous> (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2730519)
+    at l.end (C:\Tool\Vivado\2025.1\Vitis\ide\electron-app\win64\resources\app\lib\backend\6.js:2:2784911)
+    at Socket.onend (node:internal/streams/readable:946:10)
+    at Object.onceWrapper (node:events:633:28)
+    at Socket.emit (node:events:531:35) 

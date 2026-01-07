@@ -1,0 +1,67 @@
+# do run_alu.do 
+# Modifying modelsim.ini
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling package alu_types_pkg
+# 
+# Top level modules:
+# 	--none--
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling module full_adder_1_bit
+# -- Compiling module carry_block_4bits
+# -- Compiling module i_adder
+# -- Compiling module alu_shift_inst
+# 
+# Top level modules:
+# 	i_adder
+# 	alu_shift_inst
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling package alu_sv_unit
+# -- Importing package alu_types_pkg
+# -- Compiling module alu
+# 
+# Top level modules:
+# 	alu
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# ** Warning: ../verify/tb_alu.sv(67): (vlog-LRM-2244) Variable 'rand_a' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# ** Warning: ../verify/tb_alu.sv(68): (vlog-LRM-2244) Variable 'rand_b' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# ** Warning: ../verify/tb_alu.sv(73): (vlog-LRM-2244) Variable 'rand_code' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# -- Compiling package tb_alu_sv_unit
+# -- Importing package alu_types_pkg
+# -- Compiling module tb_alu
+# ** Warning: ../verify/tb_alu.sv(67): (vlog-LRM-2244) Variable 'rand_a' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# ** Warning: ../verify/tb_alu.sv(68): (vlog-LRM-2244) Variable 'rand_b' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# ** Warning: ../verify/tb_alu.sv(73): (vlog-LRM-2244) Variable 'rand_code' is implicitly static. You must explicitly declare it as static or automatic.
+# 
+# 
+# Top level modules:
+# 	tb_alu
+# vsim -c -voptargs=+acc work.tb_alu 
+# Loading sv_std.std
+# Loading work.alu_types_pkg
+# Loading work.tb_alu_sv_unit
+# Loading work.tb_alu
+# Loading work.alu_sv_unit
+# Loading work.alu
+# Loading work.i_adder
+# Loading work.alu_shift_inst
+# Loading work.full_adder_1_bit
+# Loading work.carry_block_4bits
+# ==========================================================
+#    STARTING ROBUST RISC-V ALU VERIFICATION
+# ==========================================================
+# 
+# --- [PART 1] CORNER CASES (Truong hop khac khe) ---
+# 
+# --- [PART 2] RANDOM REGRESSION (Chay 50 lenh ngau nhien) ---
+# 
+# ==========================================================
+#    VICTORY! ALL 57 TESTS PASSED.
+#    Your ALU is Solid Rock!
+# ==========================================================
+# ** Note: $finish    : ../verify/tb_alu.sv(91)
+#    Time: 570 ns  Iteration: 0  Instance: /tb_alu

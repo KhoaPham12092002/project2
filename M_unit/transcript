@@ -1,0 +1,62 @@
+# do run.do dsp 
+# 32_cycle
+# dsp
+# M_32_cycle.sv
+# M_dsp.sv
+# DSP
+# ------------------------------------------------------- 
+# >>> DANG KIEM TRA KIEN TRUC: DSP 
+# >>> FILE DESIGN DUOC NAP   : M_dsp.sv 
+# ------------------------------------------------------- 
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling package M_types_pkg
+# 
+# Top level modules:
+# 	--none--
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling module full_adder_1_bit
+# -- Compiling module carry_block_4bits
+# -- Compiling module i_adder
+# -- Compiling module alu_shift_inst
+# 
+# Top level modules:
+# 	i_adder
+# 	alu_shift_inst
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling package M_dsp_sv_unit
+# -- Importing package M_types_pkg
+# -- Compiling module riscv_m_unit
+# 
+# Top level modules:
+# 	riscv_m_unit
+# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# -- Compiling package tb_sv_unit
+# -- Importing package M_types_pkg
+# -- Compiling module tb
+# 
+# Top level modules:
+# 	tb
+# vsim -c -voptargs=+acc work.tb 
+# Loading sv_std.std
+# Loading work.M_types_pkg
+# Loading work.tb_sv_unit
+# Loading work.tb
+# Loading work.M_dsp_sv_unit
+# Loading work.riscv_m_unit
+# Loading work.i_adder
+# Loading work.full_adder_1_bit
+# Loading work.carry_block_4bits
+# ** Warning: (vsim-3017) M_dsp.sv(68): [TFMPC] - Too few port connections. Expected 7, found 6.
+# 
+#         Region: /tb/dut/shared_adder
+# ** Warning: (vsim-3722) M_dsp.sv(68): [TFMPC] - Missing connection for port 'V'.
+# 
+# ======= STARTING RISC-V M-UNIT TESTBENCH (500+ CASES) =======
+# =====================================================
+#  TEST COMPLETED
+#  PASSED:         550
+#  FAILED:           0
+# =====================================================
+#  RESULT: SUCCESS
+# ** Note: $finish    : tb.sv(131)
+#    Time: 114675 ns  Iteration: 1  Instance: /tb
