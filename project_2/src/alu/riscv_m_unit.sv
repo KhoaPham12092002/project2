@@ -132,5 +132,4 @@ module riscv_m_unit (
             result = (m_req.op == M_MUL) ? mul_res_reg[31:0] : mul_res_reg[63:32];
         end
     end
-
 endmodule
