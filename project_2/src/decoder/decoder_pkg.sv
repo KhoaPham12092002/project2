@@ -56,7 +56,7 @@ package decoder_pkg;
         WB_ALU      = 3'b000,      // ALU (ADD, SUB, AND...)
         WB_MEM      = 3'b001,      // Memory (LW, LH, LB...)
         WB_PC_PLUS4 = 3'b010, // (PC + 4) ( JAL, JALR)
-        WB_CSR      = 3'b011       // CSR 
+        WB_CSR      = 3'b011,       // CSR 
         WB_M_UNIT   = 3'b100       // M-Unit (MUL, DIV...)
     } wb_sel_e;     // select source write to register 
     // =================================================================
@@ -110,6 +110,47 @@ package decoder_pkg;
         logic [6:0]  funct7;       // Instruction funct7
         logic [11:0] funct12;      // Instruction funct12 for CSR or IMM
     } dec_in_t;
+	// =================================================================
+    	// 3. RESET VALUES (To avoid ENUMVALUE errors in Verilator)
+    	// =================================================================
+    localparam alu_req_t ALU_REQ_RST = '{
+        op: ALU_ADD, 
+        op_a_sel: OP_A_RS1, 
+        op_b_sel: OP_B_RS2
+    };
 
+    localparam m_req_t M_REQ_RST = '{
+        op: M_MUL, 
+        valid: 1'b0
+    };
+
+    localparam lsu_req_t LSU_REQ_RST = '{
+        we: 1'b0, 
+        re: 1'b0, 
+        width: MEM_BYTE, 
+        is_unsigned: 1'b0
+    };
+
+    localparam br_req_t BR_REQ_RST = '{
+        is_branch: 1'b0, 
+        is_jump: 1'b0, 
+        op: BR_BEQ
+    };
+
+    localparam csr_req_t CSR_REQ_RST = '{
+        valid: 1'b0
+    };
+
+    localparam dec_out_t DEC_OUT_RST = '{
+        alu_req: ALU_REQ_RST,
+        lsu_req: LSU_REQ_RST,
+        br_req:  BR_REQ_RST,
+        m_req:   M_REQ_RST,
+        csr_req: CSR_REQ_RST,
+        imm_type: IMM_Z,
+        rf_we:    1'b0,
+        wb_sel:   WB_ALU,
+        illegal_instr: 1'b0
+    };
 
 endpackage
