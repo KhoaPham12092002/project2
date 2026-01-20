@@ -1,0 +1,8 @@
+1 7 uvm_pkg 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 29753344 0 153676 0
+1 11 decoder_pkg 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 0 0 114 0
+1 11 riscv_instr 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 262144 0 510 0
+1 6 tb_pkg 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 1481728 30015488 2066 0
+1 10 decoder_if 5 synth 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 0 0 0 0
+1 10 decoder_if 7 fast__2 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 131072 0 111 0
+1 7 decoder 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 262144 262144 1360 0
+1 14 tb_decoder_top 4 fast 62 /home/key/workspace/project2/project_2/verify/UVM/decoder/work 0 0 0 30408704 52 0

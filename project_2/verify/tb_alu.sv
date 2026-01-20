@@ -64,13 +64,13 @@ module tb_alu;
         
         repeat (50) begin
             // Random hóa inputs
-            logic [31:0] rand_a = $urandom();
-            logic [31:0] rand_b = $urandom();
+          static logic [31:0] rand_a = $urandom();
+          static logic [31:0] rand_b = $urandom();
             
             // Random hóa Opcode (chỉ lấy trong range hợp lệ)
             // Ta dùng thủ thuật ép kiểu số sang enum
             alu_op_e rand_op;
-            logic [3:0] rand_code = $urandom_range(0, 9); // 0 đến 9 tương ứng ADD đến AND
+          static logic [3:0] rand_code = $urandom_range(0, 9); // 0 đến 9 tương ứng ADD đến AND
             
             // Cast về enum
             rand_op = alu_op_e'(rand_code); 
