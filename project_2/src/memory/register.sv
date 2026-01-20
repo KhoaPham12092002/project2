@@ -31,7 +31,7 @@ module register (
                 rf[i] <= 32'h0;
             end
         end else if (w_ena_prot) begin
-            rf[w_address_i] <= w_data_i;
+            rf[w_address_i] <= w_data;
         end
     end
 

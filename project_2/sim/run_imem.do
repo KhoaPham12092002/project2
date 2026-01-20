@@ -1,76 +1,42 @@
 # =============================================================================
-# RUN SCRIPT FOR IMEM UVM TEST
+# RUN SCRIPT FOR IMEM UVM TEST (LINUX VERSION)
 # =============================================================================
 
-# 1. Dọn dẹp thư viện cũ (Clean start)
-if [file exists work] { vdel -lib work -all }
+# 1. SETUP PATHS (Dùng đường dẫn tương đối để linh hoạt)
+set SRC_DIR   "../src"
+set VERIF_DIR "../verify"
+
+# 2. CLEANUP & INIT LIBRARY
+if {[file exists work]} { vdel -lib work -all }
 vlib work
+vmap work work
 
-# 2. Định nghĩa biến đường dẫn (Relative Paths từ thư mục 'sim')
-# ../src        tương đương C:/Users/Khoa/project2/project_2/src
-# ../verify     tương đương C:/Users/Khoa/project2/project_2/verify
-#
-set DUT_PATH    "../src/memory/IMEM.sv"
-set PKG_PATH    "../verify/MCU/imem_pkg.sv"
-set TB_PATH     "../verify/MCU/tb_top.sv"
-
-# 3. Biên dịch (Compile)
-# Lưu ý: ModelSim dùng dấu gạch chéo '/' cho đường dẫn (dù là Windows)
-
-echo "Compiling DUT..."
-vlog -sv -work work $DUT_PATH
-
-echo "Compiling UVM Package & Testbench..."
-# +incdir+... giúp compiler tìm thấy các file include bên trong thư mục MCU (nếu có)
-# -L uvm giúp link thư viện UVM có sẵn
-vlog -sv -work work -L uvm +incdir+../verify/MCU $PKG_PATH $TB_PATH
-
-# 4. Kiểm tra file program.hex
-# File hex phải nằm ngay tại thư mục 'sim' để $readmemh tìm thấy
-if {![file exists "program.hex"]} {
-    echo "WARNING: File 'program.hex' khong tim thay trong thu muc sim!"
-    echo "Creating dummy program.hex..."
-    set fp [open "program.hex" w]
-    puts $fp "00500093"
-    puts $fp "00700113"
-    puts $fp "002081B3"
-    puts $fp "DEADBEEF"
-    close $fp
+# 3. PREPARE HEX FILE
+if {[file exists "$SRC_DIR/memory/program.hex"]} {
+    file copy -force "$SRC_DIR/memory/program.hex" .
 }
 
-# 5. Chạy mô phỏng (Elaborate & Simulate)
-echo "Starting Simulation..."
-# -voptargs=+acc: Giữ lại tín hiệu để debug waveform
-# -L uvm: Load thư viện UVM
-vsim -voptargs=+acc -L uvm work.tb_top
+# 4. COMPILE
+puts "\[SCRIPT\] Compiling Design and UVM PKG..."
+vlog -sv -timescale "1ns/1ps" \
+    +incdir+$SRC_DIR/memory \
+    +incdir+$VERIF_DIR/MCU \
+    -L uvm \
+    $SRC_DIR/memory/memory_pkg.sv \
+    $SRC_DIR/memory/IMEM.sv \
+    $VERIF_DIR/MCU/imem_pkg.sv \
+    $VERIF_DIR/MCU/tb_top.sv
 
-# 6. Thiết lập Waveform
-# Tắt bớt các warnings không cần thiết của UVM
-set StdArithNoWarnings 1
-set NumericStdNoWarnings 1
+# 5. SIMULATE
+# Bỏ -c nếu bạn muốn xem giao diện ModelSim GUI
+vsim -voptargs=+acc -L uvm +UVM_TESTNAME=imem_basic_test work.tb_top
 
-# Add các tín hiệu quan trọng
-add wave -noupdate -divider {INTERFACE}
-add wave -noupdate -color yellow -radix hex sim:/tb_top/vif/clk
-add wave -noupdate -color yellow -radix hex sim:/tb_top/vif/rst_n
-add wave -noupdate -color cyan   -radix hex sim:/tb_top/vif/addr
-add wave -noupdate -color green  -radix hex sim:/tb_top/vif/instr
+# 6. WAVEFORM (Chỉ chạy nếu có giao diện GUI)
+if {[batch_mode] == 0} {
+    add wave -noupdate -divider {INTERFACE}
+    add wave -hex sim:/tb_top/vif/*
+    add wave -noupdate -divider {INTERNAL_MEM}
+    add wave -hex sim:/tb_top/dut/mem_array
+}
 
-add wave -noupdate -divider {INTERNAL MEMORY}
-# Chỉ hiển thị 10 dòng đầu của mảng nhớ để đỡ lag
-add wave -noupdate -radix hex sim:/tb_top/dut/mem_array(0)
-add wave -noupdate -radix hex sim:/tb_top/dut/mem_array(1)
-add wave -noupdate -radix hex sim:/tb_top/dut/mem_array(2)
-add wave -noupdate -radix hex sim:/tb_top/dut/mem_array(3)
-
-# Zoom toàn bộ
-view structure
-view signals
-view wave
-
-# 7. Chạy Simulation
-echo "Running UVM Test..."
 run -all
-
-# Zoom fit màn hình sau khi chạy xong
-wave zoom full
