@@ -2,19 +2,13 @@
 
 package memory_pkg;
 
-    // ========================================================================
-    //  SYSTEM MEMORY MAP CONFIGURATION (CHỈNH SỬA TẠI ĐÂY)
-    // ========================================================================
-    // Tại đây, chúng ta định nghĩa Địa chỉ cơ sở (Base) và Mask để giải mã.
-    // Mask quy định độ rộng vùng nhớ. Bit 1 nghĩa là bit đó phải khớp với Base.
     
-    // --- Instruction Memory (IMEM) ---
-    // Mặc định: 0x0000_0000 đến 0x0FFF_FFFF (Vùng 256MB đầu tiên)
+    // ========================================================================
     localparam logic [31:0] MAP_IMEM_BASE = 32'h0000_0000;
     localparam logic [31:0] MAP_IMEM_MASK = 32'hF000_0000; // Check 4 bit đầu
 
     // --- Data Memory (DMEM) ---
-    // Mặc định: 0x2000_0000 (Theo kiến trúc cũ của bạn)
+    // Mặc định: 0x2000_0000 
     localparam logic [31:0] MAP_DMEM_BASE = 32'h2000_0000;
     localparam logic [31:0] MAP_DMEM_MASK = 32'hF000_0000; 
 
