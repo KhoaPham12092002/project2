@@ -1,0 +1,9 @@
+1 11 M_types_pkg 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 15 0
+1 10 tb_sv_unit 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 0 0
+1 14 M_tree_sv_unit 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 0 0
+1 24 wallace_multiplier_32bit 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 26 0
+1 16 full_adder_1_bit 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 31 0
+1 17 carry_block_4bits 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 118 0
+1 7 i_adder 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 914 0
+1 12 riscv_m_unit 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 131072 0 371 0
+1 2 tb 4 fast 40 /home/key/workspace/project2/M_unit/work 0 0 0 0 345 0
