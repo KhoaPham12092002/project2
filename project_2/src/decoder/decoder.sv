@@ -1,417 +1,641 @@
-// ==========================================
-// 1. INTERFACE
-// ==========================================
-interface decoder_if (input logic clk);
-    import decoder_pkg::*; 
-    logic [31:0] instr_i;
-    dec_out_t    ctrl_o;
-    logic [31:0] imm_o;
-    logic [4:0]  rd_addr_o;
-    logic [4:0]  rs1_addr_o;
-    logic [4:0]  rs2_addr_o;
+module decoder 
+import decoder_pkg::*;
+(
+    input logic [31:0]        instr_i,
+    output dec_out_t          ctrl_o,   
+    output logic [31:0]        imm_o,
+    output logic [4:0]       rd_addr_o,
+    output logic [4:0]       rs1_addr_o,
+    output logic [4:0]       rs2_addr_o
+);
+// 1. INSTRUCTION SLICING (Internal Data Types)
+    // R-Type: Register-Register (ADD, SUB, SLL...)
+    typedef struct packed {
+        logic [6:0] funct7;
+        logic [4:0] rs2;
+        logic [4:0] rs1;
+        logic [2:0] funct3;
+        logic [4:0] rd;
+        logic [6:0] opcode;
+    } r_type_t;
 
-    clocking cb @(posedge clk);
-        default input #1step output #1step;
-        output instr_i;
-        input  ctrl_o, imm_o, rd_addr_o, rs1_addr_o, rs2_addr_o;
-    endclocking
-endinterface
+    // I-Type: Immediate (ADDI, SLTI, ANDI...)
+    typedef struct packed {
+        logic [11:0]    imm;
+        logic [4:0]     rs1;    
+        logic [2:0]     funct3;
+        logic [4:0]     rd;
+        logic [6:0]     opcode;
+    } i_type_t;
 
-// ==========================================
-// 2. CLASSES
-// ==========================================
-package tb_pkg;
-    import uvm_pkg::*;
-    `include "uvm_macros.svh"
-    import decoder_pkg::*;
-    import riscv_instr::*;
+    // S-Type: Store (SW, SH, SB)
+    typedef struct packed {
+        logic [6:0]     imm_11_5;
+        logic [4:0]     rs2;
+        logic [4:0]     rs1;
+        logic [2:0]     funct3;
+        logic [4:0]     imm_4_0;
+        logic [6:0]     opcode;
+    } s_type_t;
 
-    // --------------------------------------------------------
-    // 2.1 ITEM
-    // --------------------------------------------------------
-    class decoder_item extends uvm_sequence_item;
-        rand logic [31:0] instr;
-        dec_out_t    ctrl;
-        logic [31:0] imm;
-        logic [4:0]  rd_addr;
-        logic [4:0]  rs1_addr;
-        logic [4:0]  rs2_addr;
+    // B-Type: Branch (BEQ, BNE, BLT...)
+    typedef struct packed {
+        logic           imm_12;
+        logic [5:0]     imm_10_5;
+        logic [4:0]     rs2;
+        logic [4:0]     rs1;
+        logic [2:0]     funct3;
+        logic [3:0]     imm_4_1;
+        logic           imm_11;
+        logic [6:0]     opcode;
+    } b_type_t;
 
-        `uvm_object_utils_begin(decoder_item)
-            `uvm_field_int(instr, UVM_ALL_ON)
-        `uvm_object_utils_end
+    // U-Type: LUI, AUIPC
+    typedef struct packed {
+        logic [19:0]    imm_31_12;
+        logic [4:0]     rd;
+        logic [6:0]     opcode;
+    } u_type_t;
 
-        function new(string name = "decoder_item");
-            super.new(name);
-        endfunction
-    endclass
+    // J-Type: JAL
+    typedef struct packed {
+        logic           imm_20;
+        logic [9:0]     imm_10_1;
+        logic           imm_11;
+        logic [7:0]     imm_19_12;
+        logic [4:0]     rd;
+        logic [6:0]     opcode;
+    } j_type_t;
+    // UNION of all instruction types
+    typedef union packed {
+        r_type_t    r_type;
+        i_type_t    i_type;
+        s_type_t    s_type;
+        b_type_t    b_type;
+        u_type_t    u_type;
+        j_type_t    j_type;
+        logic [31:0] raw;
+    } instr_t;
 
-    // --------------------------------------------------------
-    // 2.2 SEQUENCER
-    // --------------------------------------------------------
-    typedef uvm_sequencer #(decoder_item) decoder_sequencer;
+    instr_t instr; 
+    assign instr.raw = instr_i;
+    
+    // assign input to BUS
+    assign rd_addr_o   = instr.r_type.rd;
+    assign rs1_addr_o  = instr.r_type.rs1;
+    assign rs2_addr_o  = instr.r_type.rs2;  
 
-    // --------------------------------------------------------
-    // 2.3 SEQUENCE (FULL COVERAGE - 50 CASES PER INSTR)
-    // --------------------------------------------------------
-    class decoder_full_sequence extends uvm_sequence #(decoder_item);
-        `uvm_object_utils(decoder_full_sequence)
+// 2.MAIN CONTROL DECODER 
+    always_comb begin
+	// Default Assignments 
+        ctrl_o.illegal_instr = 1'b0;
+        ctrl_o.imm_type      = IMM_I;
+        ctrl_o.rf_we        = 1'b0;
+        ctrl_o.wb_sel       = WB_ALU;
+	// Reset sub-packets to 0
+	ctrl_o.alu_req = ALU_REQ_RST;
+	ctrl_o.m_req   = M_REQ_RST;
+	ctrl_o.lsu_req = LSU_REQ_RST;
+	ctrl_o.br_req  = BR_REQ_RST;
+    // Instruction Decoding
+    casez (instr.raw)
+        // GROUP 1: UPPER IMMEDIATE (U-Type)
+            LUI: begin
+                ctrl_o.imm_type = IMM_U;    
+                ctrl_o.rf_we    = 1'b1; // Ghi vào Rd
+                ctrl_o.wb_sel   = WB_ALU; 
 
-        function new(string name = "decoder_full_sequence");
-            super.new(name);
-        endfunction
-
-        // --- Helper Tasks để tạo lệnh theo định dạng ---
-        
-        // 1. R-Type: {funct7, rs2, rs1, funct3, rd, opcode}
-        task gen_r_type(string name, logic [6:0] op, logic [2:0] f3, logic [6:0] f7);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {f7, 5'($urandom), 5'($urandom), f3, 5'($urandom), op};
-                finish_item(req);
+                //  Logic: ALU Result = 0 + Immediate (Pass B)
+                ctrl_o.alu_req.op        = ALU_B;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1; // RS1 = 0
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM; // B = IMM
             end
-        endtask
+            // AUIPC: Add Upper Imm to PC (Rd = PC + (Imm << 12))
+            AUIPC: begin
+                ctrl_o.imm_type = IMM_U;    
+                ctrl_o.rf_we    = 1'b1; // Ghi vào Rd
+                ctrl_o.wb_sel   = WB_ALU; 
 
-        // 2. I-Type: {imm[11:0], rs1, funct3, rd, opcode}
-        task gen_i_type(string name, logic [6:0] op, logic [2:0] f3);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {12'($urandom), 5'($urandom), f3, 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = PC + Immediate (Pass A and B)
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_PC;    // A = PC
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;   // B = IMM
             end
-        endtask
+        // GROUP 2: ARITHMETIC & LOGIC (I-Type)
+            // ALU IMMEDIATE INSTRUCTIONS    
+            // ADDI : Add Immediate (Rd = Rs1 + Imm)
+            ADDI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        // 2b. Shift I-Type (Special): {funct7, shamt, rs1, funct3, rd, opcode}
-        task gen_shift_i_type(string name, logic [6:0] op, logic [2:0] f3, logic [6:0] f7);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {f7, 5'($urandom), 5'($urandom), f3, 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = Rs1 + Immediate
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // SLTI: Set Less Than Immediate (Signed)
+            SLTI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        // 3. S-Type: {imm[11:5], rs2, rs1, funct3, imm[4:0], opcode}
-        task gen_s_type(string name, logic [6:0] op, logic [2:0] f3);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {7'($urandom), 5'($urandom), 5'($urandom), f3, 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = (Rs1 < Immediate) ? 1 : 0
+                ctrl_o.alu_req.op        = ALU_SLT;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // SLTIU: Set Less Than Immediate (Unsigned)
+            SLTIU: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        // 4. B-Type: {imm..., rs2, rs1, funct3, imm..., opcode} (Random bits vào vị trí imm)
-        task gen_b_type(string name, logic [6:0] op, logic [2:0] f3);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {7'($urandom), 5'($urandom), 5'($urandom), f3, 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = (Rs1 < Immediate) ? 1 : 0
+                ctrl_o.alu_req.op        = ALU_SLTU;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // ANDI : AND Immediate
+            ANDI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        // 5. U-Type: {imm[31:12], rd, opcode}
-        task gen_u_type(string name, logic [6:0] op);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {20'($urandom), 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = Rs1 & Immediate
+                ctrl_o.alu_req.op        = ALU_AND;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // ORI : OR Immediate
+            ORI: begin  
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        // 6. J-Type (JAL): {imm..., rd, opcode}
-        task gen_j_type(string name, logic [6:0] op);
-            `uvm_info("SEQ", $sformatf("Generating 50 cases for: %s", name), UVM_LOW)
-            repeat(50) begin
-                req = decoder_item::type_id::create("req");
-                start_item(req);
-                req.instr = {20'($urandom), 5'($urandom), op};
-                finish_item(req);
+                // Logic: ALU Result = Rs1 | Immediate
+                ctrl_o.alu_req.op        = ALU_OR;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // XORI : XOR Immediate
+            XORI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-
-        // --- MAIN BODY: Liệt kê tất cả lệnh ---
-        task body();
-            // Định nghĩa Opcode chuẩn RISC-V (RV32I + M)
-            logic [6:0] OP_LUI    = 7'b0110111;
-            logic [6:0] OP_AUIPC  = 7'b0010111;
-            logic [6:0] OP_JAL    = 7'b1101111;
-            logic [6:0] OP_JALR   = 7'b1100111;
-            logic [6:0] OP_BRANCH = 7'b1100011;
-            logic [6:0] OP_LOAD   = 7'b0000011;
-            logic [6:0] OP_STORE  = 7'b0100011;
-            logic [6:0] OP_IMM    = 7'b0010011;
-            logic [6:0] OP_REG    = 7'b0110011;
-
-            // 1. U-Type
-            gen_u_type("LUI",   OP_LUI);
-            gen_u_type("AUIPC", OP_AUIPC);
-
-            // 2. J-Type
-            gen_j_type("JAL",   OP_JAL);
-            gen_i_type("JALR",  OP_JALR, 3'b000); // JALR la I-Type
-
-            // 3. B-Type (Branch)
-            gen_b_type("BEQ",  OP_BRANCH, 3'b000);
-            gen_b_type("BNE",  OP_BRANCH, 3'b001);
-            gen_b_type("BLT",  OP_BRANCH, 3'b100);
-            gen_b_type("BGE",  OP_BRANCH, 3'b101);
-            gen_b_type("BLTU", OP_BRANCH, 3'b110);
-            gen_b_type("BGEU", OP_BRANCH, 3'b111);
-
-            // 4. Load Instructions (I-Type)
-            gen_i_type("LB",  OP_LOAD, 3'b000);
-            gen_i_type("LH",  OP_LOAD, 3'b001);
-            gen_i_type("LW",  OP_LOAD, 3'b010);
-            gen_i_type("LBU", OP_LOAD, 3'b100);
-            gen_i_type("LHU", OP_LOAD, 3'b101);
-
-            // 5. Store Instructions (S-Type)
-            gen_s_type("SB", OP_STORE, 3'b000);
-            gen_s_type("SH", OP_STORE, 3'b001);
-            gen_s_type("SW", OP_STORE, 3'b010);
-
-            // 6. ALU Immediate (I-Type)
-            gen_i_type("ADDI",  OP_IMM, 3'b000);
-            gen_i_type("SLTI",  OP_IMM, 3'b010);
-            gen_i_type("SLTIU", OP_IMM, 3'b011);
-            gen_i_type("XORI",  OP_IMM, 3'b100);
-            gen_i_type("ORI",   OP_IMM, 3'b110);
-            gen_i_type("ANDI",  OP_IMM, 3'b111);
-            
-            // Shift Immediate (Can funct7)
-            gen_shift_i_type("SLLI", OP_IMM, 3'b001, 7'b0000000);
-            gen_shift_i_type("SRLI", OP_IMM, 3'b101, 7'b0000000);
-            gen_shift_i_type("SRAI", OP_IMM, 3'b101, 7'b0100000);
-
-            // 7. ALU Register (R-Type)
-            gen_r_type("ADD",  OP_REG, 3'b000, 7'b0000000);
-            gen_r_type("SUB",  OP_REG, 3'b000, 7'b0100000);
-            gen_r_type("SLL",  OP_REG, 3'b001, 7'b0000000);
-            gen_r_type("SLT",  OP_REG, 3'b010, 7'b0000000);
-            gen_r_type("SLTU", OP_REG, 3'b011, 7'b0000000);
-            gen_r_type("XOR",  OP_REG, 3'b100, 7'b0000000);
-            gen_r_type("SRL",  OP_REG, 3'b101, 7'b0000000);
-            gen_r_type("SRA",  OP_REG, 3'b101, 7'b0100000);
-            gen_r_type("OR",   OP_REG, 3'b110, 7'b0000000);
-            gen_r_type("AND",  OP_REG, 3'b111, 7'b0000000);
-
-            // 8. Multiply Extension (R-Type) - funct7=0000001
-            gen_r_type("MUL",    OP_REG, 3'b000, 7'b0000001);
-            gen_r_type("MULH",   OP_REG, 3'b001, 7'b0000001);
-            gen_r_type("MULHSU", OP_REG, 3'b010, 7'b0000001);
-            gen_r_type("MULHU",  OP_REG, 3'b011, 7'b0000001);
-            gen_r_type("DIV",    OP_REG, 3'b100, 7'b0000001);
-            gen_r_type("DIVU",   OP_REG, 3'b101, 7'b0000001);
-            gen_r_type("REM",    OP_REG, 3'b110, 7'b0000001);
-            gen_r_type("REMU",   OP_REG, 3'b111, 7'b0000001);
-
-        endtask
-    endclass
-
-    // --------------------------------------------------------
-    // 2.4 DRIVER
-    // --------------------------------------------------------
-    class decoder_driver extends uvm_driver #(decoder_item);
-        `uvm_component_utils(decoder_driver)
-        virtual decoder_if vif;
-
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-        endfunction
-
-        function void build_phase(uvm_phase phase);
-            super.build_phase(phase);
-            if(!uvm_config_db#(virtual decoder_if)::get(this, "", "vif", vif))
-                `uvm_fatal("DRV", "Could not get vif")
-        endfunction
-
-        task run_phase(uvm_phase phase);
-            forever begin
-                seq_item_port.get_next_item(req);
-                drive();
-                seq_item_port.item_done();
+                // Logic: ALU Result = Rs1 ^ Immediate
+                ctrl_o.alu_req.op        = ALU_XOR;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
+            // SLLI : Shift Left Logical Immediate
+            SLLI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        task drive();
-            @(posedge vif.clk);
-            vif.instr_i <= req.instr;
-        endtask
-    endclass
-
-    // --------------------------------------------------------
-    // 2.5 MONITOR
-    // --------------------------------------------------------
-    class decoder_monitor extends uvm_monitor;
-        `uvm_component_utils(decoder_monitor)
-        virtual decoder_if vif;
-        uvm_analysis_port #(decoder_item) mon_ap;
-
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-            mon_ap = new("mon_ap", this);
-        endfunction
-
-        function void build_phase(uvm_phase phase);
-            super.build_phase(phase);
-            if(!uvm_config_db#(virtual decoder_if)::get(this, "", "vif", vif))
-                 `uvm_fatal("MON", "Could not get vif")
-        endfunction
-
-        task run_phase(uvm_phase phase);
-            forever begin
-                @(posedge vif.clk); 
-                #1; 
-                begin
-                    decoder_item item = decoder_item::type_id::create("item");
-                    item.instr    = vif.instr_i;
-                    item.ctrl     = vif.ctrl_o;
-                    item.imm      = vif.imm_o;
-                    item.rd_addr  = vif.rd_addr_o;
-                    
-                    if (item.instr !== 'x) begin
-                        mon_ap.write(item);
-                    end
-                end
+                // Logic: ALU Result = Rs1 << shamt
+                ctrl_o.alu_req.op        = ALU_SLL;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
             end
-        endtask
-    endclass
+            // SRLI : Shift Right Logical Immediate
+            SRLI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-    // --------------------------------------------------------
-    // 2.6 AGENT
-    // --------------------------------------------------------
-    class decoder_agent extends uvm_agent;
-        `uvm_component_utils(decoder_agent)
-        decoder_driver    driver;
-        decoder_monitor   monitor;
-        decoder_sequencer sequencer;
+                // Logic: ALU Result = Rs1 >> shamt (logical)
+                ctrl_o.alu_req.op        = ALU_SRL;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            end
+            // SRAI : Shift Right Arithmetic Immediate
+            SRAI: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-        endfunction
+                // Logic: ALU Result = Rs1 >> shamt (arithmetic)
+                ctrl_o.alu_req.op        = ALU_SRA;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            end
+            // LOAD INSTRUCTIONS
+            // LB : Load Byte (sign-extended)
+            LB: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_MEM;
+                // Address Rs1 + Imm_11_0
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+                // Logic: Load Byte from Memory
+                ctrl_o.lsu_req.width = MEM_BYTE;
+                ctrl_o.lsu_req.is_unsigned = 1'b0;
+                ctrl_o.lsu_req.re   = 1'b1;
+            end
+            // LBU : Load Byte Unsigned
+            LBU: begin
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_MEM;
+                // Address Rs1 + Imm_11_0
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+                // Logic: Load Byte from Memory
+                ctrl_o.lsu_req.width = MEM_BYTE;
+                ctrl_o.lsu_req.is_unsigned = 1'b1;
+                ctrl_o.lsu_req.re   = 1'b1;
+            end
+            // LH : Load Halfword (sign-extended)
+            LH: begin 
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_MEM;
+                // Address Rs1 + Imm_11_0
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+                // Logic: Load Halfword from Memory
+                ctrl_o.lsu_req.width = MEM_HALF;
+                ctrl_o.lsu_req.is_unsigned = 1'b0;
+                ctrl_o.lsu_req.re   = 1'b1;
+            end
+            // LHU : Load Halfword Unsigned
+            LHU: begin  
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_MEM;
+                // Address Rs1 + Imm_11_0
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+                // Logic: Load Halfword from Memory
+                ctrl_o.lsu_req.width = MEM_HALF;
+                ctrl_o.lsu_req.is_unsigned = 1'b1;
+                ctrl_o.lsu_req.re   = 1'b1;
+            end 
+            //LW : Load Word
+            LW: begin   
+                ctrl_o.imm_type = IMM_I;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_MEM;
+                // Address Rs1 + Imm_11_0
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+                // Logic: Load Word from Memory
+                ctrl_o.lsu_req.width = MEM_WORD;
+                ctrl_o.lsu_req.is_unsigned = 1'b1;
+                ctrl_o.lsu_req.re   = 1'b1;
+            end
+            // JALR : Jump and Link Register -> PC = Rs1 + Imm, Rd = PC + 4
+            JALR: begin
+            ctrl_o.imm_type = IMM_I;
+            ctrl_o.br_req.is_jump       = 1'b1;
+            ctrl_o.br_req.is_branch     = 1'b0;
+            ctrl_o.rf_we    = 1'b1; // Ghi PC + 4 vào Rd
+            ctrl_o.wb_sel   = WB_PC_PLUS4;
+            // Logic: ALU Result = Rs1 + Immediate (for target address)
+            ctrl_o.alu_req.op        = ALU_ADD;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            end
+        // GROUP 3: ARITHMETIC & LOGIC (R-Type)
+            // ADD : Add  (Rd = Rs1 + Rs2)
+            ADD: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function void build_phase(uvm_phase phase);
-            super.build_phase(phase);
-            driver    = decoder_driver::type_id::create("driver", this);
-            monitor   = decoder_monitor::type_id::create("monitor", this);
-            sequencer = decoder_sequencer::type_id::create("sequencer", this);
-        endfunction
+                // Logic: ALU Result = Rs1 + Rs2
+                ctrl_o.alu_req.op        = ALU_ADD;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SUB : Subtract (Rd = Rs1 - Rs2)
+            SUB: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function void connect_phase(uvm_phase phase);
-            super.connect_phase(phase);
-            driver.seq_item_port.connect(sequencer.seq_item_export);
-        endfunction
-    endclass
+                // Logic: ALU Result = Rs1 - Rs2
+                ctrl_o.alu_req.op        = ALU_SUB;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SLT: Set Less Than  (Signed)
+            SLT: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-    // --------------------------------------------------------
-    // 2.7 SCOREBOARD (Đã nâng cấp để in log đẹp hơn)
-    // --------------------------------------------------------
-    class decoder_scoreboard extends uvm_scoreboard;
-        `uvm_component_utils(decoder_scoreboard)
-        uvm_analysis_imp #(decoder_item, decoder_scoreboard) item_collected_export;
+                // Logic: ALU Result = (Rs1 < Rs2) ? 1 : 0
+                ctrl_o.alu_req.op        = ALU_SLT;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SLTU: Set Less Than  (Unsigned)
+            SLTU: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-            item_collected_export = new("item_collected_export", this);
-        endfunction
+                // Logic: ALU Result = (Rs1 < Rs2) ? 1 : 0
+                ctrl_o.alu_req.op        = ALU_SLTU;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // AND : AND 
+            AND: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function void write(decoder_item item);
-            // In thông tin để check
-            `uvm_info("SCB", $sformatf("INSTR: %h | DEC_IMM: %h | ALU_OP: %s", 
-                item.instr, item.imm, item.ctrl.alu_req.op.name()), UVM_LOW)
-        endfunction
-    endclass
+                // Logic: ALU Result = Rs1 & Rs2
+                ctrl_o.alu_req.op        = ALU_AND;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // OR : OR 
+            OR: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-    // --------------------------------------------------------
-    // 2.8 ENV
-    // --------------------------------------------------------
-    class decoder_env extends uvm_env;
-        `uvm_component_utils(decoder_env)
-        decoder_agent      agent;
-        decoder_scoreboard scb;
+                // Logic: ALU Result = Rs1 | Rs2
+                ctrl_o.alu_req.op        = ALU_OR;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // XOR : XOR Immediate
+            XOR: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-        endfunction
+                // Logic: ALU Result = Rs1 ^ Rs2
+                ctrl_o.alu_req.op        = ALU_XOR;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SLL : Shift Left Logical Immediate
+            SLL: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function void build_phase(uvm_phase phase);
-            super.build_phase(phase);
-            agent = decoder_agent::type_id::create("agent", this);
-            scb   = decoder_scoreboard::type_id::create("scb", this);
-        endfunction
+                // Logic: ALU Result = Rs1 << shamt
+                ctrl_o.alu_req.op        = ALU_SLL;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SRL : Shift Right Logical Immediate
+            SRL: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-        function void connect_phase(uvm_phase phase);
-            super.connect_phase(phase);
-            agent.monitor.mon_ap.connect(scb.item_collected_export);
-        endfunction
-    endclass
+                // Logic: ALU Result = Rs1 >> shamt (logical)
+                ctrl_o.alu_req.op        = ALU_SRL;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+            // SRA : Shift Right Arithmetic Immediate
+            SRA: begin
+                ctrl_o.imm_type = IMM_Z;
+                ctrl_o.rf_we    = 1'b1;
+                ctrl_o.wb_sel   = WB_ALU;
 
-    // --------------------------------------------------------
-    // 2.9 TEST (Sử dụng Sequence Full Coverage)
-    // --------------------------------------------------------
-    class decoder_full_test extends uvm_test;
-        `uvm_component_utils(decoder_full_test)
-        decoder_env env;
+                // Logic: ALU Result = Rs1 >> shamt (arithmetic)
+                ctrl_o.alu_req.op        = ALU_SRA;
+                ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+                ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // GROUP 4: BRANCH INSTRUCTIONS (B-Type)
+        // BEQ : Branch if Equal
+        BEQ: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BEQ;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1; 
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SUB;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // BNE : Branch if Not Equal
+        BNE: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BNE;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1;
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SUB;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // BLT : Branch if Less Than (Signed)
+        BLT: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BLT;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1;
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SLT;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // BLTU : Branch if Less Than (Unsigned)
+        BLTU: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BLTU;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1;
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SLTU;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // BGE : Branch if Greater Than or Equal (Signed)
+        BGE: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BGE;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1;
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SLT;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // BGEU : Branch if Greater Than or Equal (Unsigned)
+        BGEU: begin
+            ctrl_o.imm_type = IMM_B;
+            ctrl_o.br_req.op = BR_BGEU;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            ctrl_o.br_req.is_branch     = 1'b1;
+            ctrl_o.br_req.is_jump       = 1'b0;
+            // Logic: ALU Result = Rs1 - Rs2 (for comparison)
+            ctrl_o.alu_req.op        = ALU_SLTU;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_RS2;
+            end
+        // GROUP 5: JUMP INSTRUCTIONS (J-Type & I-Type)
+        // JAL : Jump and Link -> PC = PC+ Imm, Rd = PC + 4
+        JAL: begin
+            ctrl_o.imm_type = IMM_J;
+            ctrl_o.br_req.is_jump       = 1'b1;
+            ctrl_o.br_req.is_branch     = 1'b0;
+            ctrl_o.rf_we                = 1'b1; // Ghi PC + 4 vào Rd
+            ctrl_o.wb_sel               = WB_PC_PLUS4;
+            ctrl_o.br_req.is_jump       = 1'b1;
+            // Logic: ALU Result = PC + Immediate (for target address)
+            ctrl_o.alu_req.op        = ALU_ADD;
+            ctrl_o.alu_req.op_a_sel  = OP_A_PC;
+            ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+        end
+        // GROUP 6: STORE INSTRUCTIONS (S-Type)
+        // SB : Store Byte
+        SB: begin
+            ctrl_o.imm_type = IMM_S;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            // Address Rs1 + Imm_11_0
+            ctrl_o.alu_req.op        = ALU_ADD;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            // Logic: Store Byte to Memory
+            ctrl_o.lsu_req.width = MEM_BYTE;
+            ctrl_o.lsu_req.we   = 1'b1;
+        end
+        // SH : Store Halfword
+        SH: begin
+            ctrl_o.imm_type = IMM_S;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            // Address Rs1 + Imm_11_0
+            ctrl_o.alu_req.op        = ALU_ADD;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            // Logic: Store Halfword to Memory
+            ctrl_o.lsu_req.width = MEM_HALF;
+            ctrl_o.lsu_req.we   = 1'b1;
+        end
+        // SW : Store Word
+        SW: begin
+            ctrl_o.imm_type = IMM_S;
+            ctrl_o.rf_we    = 1'b0; // Không ghi vào Rd
+            // Address Rs1 + Imm_11_0
+            ctrl_o.alu_req.op        = ALU_ADD;
+            ctrl_o.alu_req.op_a_sel  = OP_A_RS1;
+            ctrl_o.alu_req.op_b_sel  = OP_B_IMM;
+            // Logic: Store Word to Memory
+            ctrl_o.lsu_req.width = MEM_WORD;
+            ctrl_o.lsu_req.we   = 1'b1;
+        end
+        // GROUP 7: MULTIPLY & DIVIDE (R-Type)
+        // MUL : Multiply (Rd = Rs1 * Rs2)
+        MUL: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
 
-        function new(string name, uvm_component parent);
-            super.new(name, parent);
-        endfunction
+            // Logic: MULDIV Result = Rs1 * Rs2
+            ctrl_o.m_req.op        = M_MUL;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // MULH : Multiply High (Signed)
+        MULH: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
 
-        function void build_phase(uvm_phase phase);
-            super.build_phase(phase);
-            env = decoder_env::type_id::create("env", this);
-        endfunction
+            // Logic: MULDIV Result = high 32 bits of (Rs1 * Rs2)
+            ctrl_o.m_req.op        = M_MULH;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // MULHU : Multiply High Unsigned
+        MULHU: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
 
-        task run_phase(uvm_phase phase);
-            decoder_full_sequence seq; // Dùng Sequence mới
-            phase.raise_objection(this);
-            seq = decoder_full_sequence::type_id::create("seq");
-            seq.start(env.agent.sequencer);
-            phase.drop_objection(this);
-        endtask
-    endclass
-endpackage
+            // Logic: MULDIV Result = high 32 bits of (Rs1 * Rs2)
+            ctrl_o.m_req.op        = M_MULHU;
+            ctrl_o.m_req.valid     = 1'b1;
+        end 
+        // MULHSU : Multiply High Signed-Unsigned
+        MULHSU: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
 
-// ==========================================
-// 3. TOP MODULE
-// ==========================================
-module tb_decoder_top;
-    import uvm_pkg::*;
-    import decoder_pkg::*;
-    import tb_pkg::*;
+            // Logic: MULDIV Result = high 32 bits of (Rs1 * Rs2)
+            ctrl_o.m_req.op        = M_MULHSU;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // DIV : Divide (Rd = Rs1 / Rs2)
+        DIV: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
 
-    logic clk;
-    initial begin
-        clk = 0;
-        forever #5 clk = ~clk;
+            // Logic: MULDIV Result = Rs1 / Rs2
+            ctrl_o.m_req.op        = M_DIV;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // DIVU : Divide Unsigned (Rd = Rs1 / Rs2)
+        DIVU: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
+
+            // Logic: MULDIV Result = Rs1 / Rs2
+            ctrl_o.m_req.op        = M_DIVU;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // REM : Remainder (Rd = Rs1 % Rs2)
+        REM: begin
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
+
+            // Logic: MULDIV Result = Rs1 % Rs2
+            ctrl_o.m_req.op        = M_REM;
+            ctrl_o.m_req.valid     = 1'b1;
+        end
+        // REMU : Remainder Unsigned (Rd = Rs1 % Rs2)
+        REMU: begin 
+            ctrl_o.imm_type = IMM_Z;
+            ctrl_o.rf_we    = 1'b1;
+            ctrl_o.wb_sel   = WB_M_UNIT;
+
+            // Logic: MULDIV Result = Rs1 % Rs2
+            ctrl_o.m_req.op        = M_REMU;
+            ctrl_o.m_req.valid     = 1'b1;
+        end 
+        default: begin
+            ctrl_o.illegal_instr = 1'b1; // Báo lệnh không hợp lệ (Trap)
+        end
+    endcase
     end
-
-    decoder_if dut_if(clk);
-
-    decoder dut (
-        .instr_i    (dut_if.instr_i),
-        .ctrl_o     (dut_if.ctrl_o),
-        .imm_o      (dut_if.imm_o),
-        .rd_addr_o  (dut_if.rd_addr_o),
-        .rs1_addr_o (dut_if.rs1_addr_o),
-        .rs2_addr_o (dut_if.rs2_addr_o)
-    );
-
-    initial begin
-        uvm_config_db#(virtual decoder_if)::set(null, "*", "vif", dut_if);
-        // Chạy test mới: decoder_full_test
-        run_test("decoder_full_test");
-    end
+// 3. IMMEDIATE GENERATION
+    always_comb begin
+        unique case (ctrl_o.imm_type)
+            IMM_I: imm_o = {{20{instr.i_type.imm[11]}}, instr.i_type.imm};
+            IMM_S: imm_o = {{20{instr.s_type.imm_11_5[6]}}, instr.s_type.imm_11_5, instr.s_type.imm_4_0};
+            IMM_B: imm_o = {{19{instr.b_type.imm_12}}, instr.b_type.imm_12, instr.b_type.imm_11, instr.b_type.imm_10_5, instr.b_type.imm_4_1, 1'b0};
+            IMM_U: imm_o = {instr.u_type.imm_31_12, 12'b0};
+            IMM_J: imm_o = {{11{instr.j_type.imm_20}}, instr.j_type.imm_20, instr.j_type.imm_19_12, instr.j_type.imm_11, instr.j_type.imm_10_1, 1'b0};
+            IMM_Z: imm_o = 32'b0;
+            default: imm_o = 32'b0;
+        endcase
+    end        
 endmodule
