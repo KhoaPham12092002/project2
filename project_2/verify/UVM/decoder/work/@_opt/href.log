@@ -1,0 +1,15 @@
+BEGIN 3:decoder_if:fast__2:work
+    imm_o :  1:tb_decoder_top:fast:work
+    rs1_addr_o :  1:tb_decoder_top:fast:work
+    ctrl_o :  1:tb_decoder_top:fast:work
+    rd_addr_o :  1:tb_decoder_top:fast:work
+    rs2_addr_o :  1:tb_decoder_top:fast:work
+    instr_i :  1:tb_decoder_top:fast:work
+END 
+BEGIN 3:decoder_if:fast__1:work
+    imm_o :  1:tb_pkg:fast:work
+    instr_i :  1:tb_pkg:fast:work
+    clk :  1:tb_pkg:fast:work
+    rd_addr_o :  1:tb_pkg:fast:work
+    ctrl_o :  1:tb_pkg:fast:work
+END 

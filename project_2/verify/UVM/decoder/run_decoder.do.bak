@@ -1,0 +1,38 @@
+set UVM_HOME "/home/key/tool/questa_fse/verilog_src/uvm-1.2"
+# 1. Tạo thư viện làm việc (Work library)
+if {[file exists work]} {
+    vdel -lib work -all
+}
+vlib work
+
+# 2. Compile (Biên dịch)
+echo "Loading compile UVM library "
+vlog -sv +incdir+$UVM_HOME/src $UVM_HOME/src/uvm_pkg.sv
+
+# 3. Compile code 
+
+echo "Compile Design & Testbench"
+
+vlog -sv +incdir+$UVM_HOME/src \ 
+    decoder_pkg.sv \
+    riscv_instr.sv \
+    decoder.sv \
+    tb_decoder_top.sv
+
+# 4. Load Simulation (Nạp mô phỏng)
+# -voptargs=+acc: Cực kỳ quan trọng với bản Starter. 
+# Nó tắt tối ưu hóa để bạn có thể xem được Waveform và biến nội tại.
+# tb_top: Tên module trên cùng của testbench
+echo "Start simulation"
+vsim -voptargs=+acc -L tb_decoder_top
+
+# 4. Add Waveform
+# Thêm tất cả tín hiệu trong DUT vào wave window để debug
+add wave -position insertpoint sim:/tb_decoder_top/dut/*
+
+# Format hiển thị dạng Hex cho dễ nhìn
+radix -hex
+
+# 5. Run Simulation
+# Chạy cho đến khi testbench gọi $finish hoặc chạy hết thời gian
+run -all

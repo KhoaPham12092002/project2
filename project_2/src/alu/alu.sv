@@ -40,7 +40,7 @@ module alu (
 
     alu_shift_inst shift_inst (
         alu_req.a,            // data in 1
-        alu_req.b,      // shift amount from lower 5 bits of operand B
+        alu_req.b[4:0],      // shift amount from lower 5 bits of operand B
         shift_type,             // shift type: 00 SLL
         shift_o              // result
     );

@@ -140,17 +140,4 @@ package decoder_pkg;
     localparam csr_req_t CSR_REQ_RST = '{
         valid: 1'b0
     };
-
-    localparam dec_out_t DEC_OUT_RST = '{
-        alu_req: ALU_REQ_RST,
-        lsu_req: LSU_REQ_RST,
-        br_req:  BR_REQ_RST,
-        m_req:   M_REQ_RST,
-        csr_req: CSR_REQ_RST,
-        imm_type: IMM_Z,
-        rf_we:    1'b0,
-        wb_sel:   WB_ALU,
-        illegal_instr: 1'b0
-    };
-
 endpackage
