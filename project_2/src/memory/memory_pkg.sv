@@ -2,7 +2,11 @@
 
 package memory_pkg;
 
-    
+    // --- SYSTEM CONFIGURATION ---
+    localparam int IMEM_SIZE_BYTES = 4096;  // 4KB
+    localparam int DMEM_SIZE_BYTES = 4096;  // 4KB
+    localparam int XLEN            = 32;    // Data Width (RISC-V 32-bit)
+
     // ========================================================================
     localparam logic [31:0] MAP_IMEM_BASE = 32'h0000_0000;
     localparam logic [31:0] MAP_IMEM_MASK = 32'hF000_0000; // Check 4 bit đầu
