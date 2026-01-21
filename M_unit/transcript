@@ -1,19 +1,27 @@
-# do run.do dsp 
+# do run.do tree
 # 32_cycle
-# dsp
+# tree
 # M_32_cycle.sv
-# M_dsp.sv
-# DSP
-# ------------------------------------------------------- 
-# >>> DANG KIEM TRA KIEN TRUC: DSP 
-# >>> FILE DESIGN DUOC NAP   : M_dsp.sv 
-# ------------------------------------------------------- 
-# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# M_tree.sv
+# TREE
+# -------------------------------------------------------
+# >>> DANG KIEM TRA KIEN TRUC: TREE
+# >>> FILE DESIGN DUOC NAP   : M_tree.sv
+# -------------------------------------------------------
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 23:36:04 on Jan 07,2026
+# vlog -sv -work work package.sv 
+# ** Note: (vlog-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
 # -- Compiling package M_types_pkg
 # 
 # Top level modules:
 # 	--none--
-# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# End time: 23:36:04 on Jan 07,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 23:36:04 on Jan 07,2026
+# vlog -sv -work work adder.sv 
+# ** Note: (vlog-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
 # -- Compiling module full_adder_1_bit
 # -- Compiling module carry_block_4bits
 # -- Compiling module i_adder
@@ -22,35 +30,74 @@
 # Top level modules:
 # 	i_adder
 # 	alu_shift_inst
-# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
-# -- Compiling package M_dsp_sv_unit
+# End time: 23:36:04 on Jan 07,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 23:36:04 on Jan 07,2026
+# vlog -sv -work work M_tree.sv 
+# ** Note: (vlog-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
+# ** Warning: M_tree.sv(38): (vlog-13314) Defaulting port 'm_req' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# -- Compiling package M_tree_sv_unit
 # -- Importing package M_types_pkg
+# -- Compiling module full_adder
+# -- Compiling module half_adder
+# -- Compiling module wallace_multiplier_32bit
 # -- Compiling module riscv_m_unit
+# ** Warning: M_tree.sv(38): (vlog-13314) Defaulting port 'm_req' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
 # 
 # Top level modules:
+# 	full_adder
+# 	half_adder
 # 	riscv_m_unit
-# Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+# End time: 23:36:04 on Jan 07,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 2
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 23:36:04 on Jan 07,2026
+# vlog -sv -work work tb.sv 
+# ** Note: (vlog-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
 # -- Compiling package tb_sv_unit
 # -- Importing package M_types_pkg
 # -- Compiling module tb
 # 
 # Top level modules:
 # 	tb
-# vsim -c -voptargs=+acc work.tb 
+# End time: 23:36:04 on Jan 07,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# ** Note: (vsim-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
+# vsim -c -voptargs="+acc" work.tb 
+# Start time: 23:36:04 on Jan 07,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vopt-10908) Some optimizations are turned off because the +acc switch is in effect.
+# ** Note: (vopt-220) '/home/key/tool/questa_fse/linux_x86_64/../modelsim.ini' is used as the ini file.
+# ** Warning: M_tree.sv(38): (vopt-13314) Defaulting port 'm_req' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: M_tree.sv(99): (vopt-2685) [TFMPC] - Too few port connections for 'shared_adder'.  Expected 7, found 6.
+# ** Warning: M_tree.sv(99): (vopt-2718) [TFMPC] - Missing connection for port 'V'.
+# ** Note: (vopt-143) Recognized 1 FSM in module "riscv_m_unit(fast)".
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=4.
+# //  Questa Altera Starter FPGA Edition-64
+# //  Version 2025.2 linux_x86_64 May 31 2025
+# //
+# // Unpublished work. Copyright 2025 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
 # Loading sv_std.std
-# Loading work.M_types_pkg
-# Loading work.tb_sv_unit
-# Loading work.tb
-# Loading work.M_dsp_sv_unit
-# Loading work.riscv_m_unit
-# Loading work.i_adder
-# Loading work.full_adder_1_bit
-# Loading work.carry_block_4bits
-# ** Warning: (vsim-3017) M_dsp.sv(68): [TFMPC] - Too few port connections. Expected 7, found 6.
-# 
-#         Region: /tb/dut/shared_adder
-# ** Warning: (vsim-3722) M_dsp.sv(68): [TFMPC] - Missing connection for port 'V'.
-# 
+# Loading work.M_types_pkg(fast)
+# Loading work.tb_sv_unit(fast)
+# Loading work.tb(fast)
+# Loading work.M_tree_sv_unit(fast)
+# Loading work.riscv_m_unit(fast)
+# Loading work.wallace_multiplier_32bit(fast)
+# Loading work.i_adder(fast)
+# Loading work.full_adder_1_bit(fast)
+# Loading work.carry_block_4bits(fast)
 # ======= STARTING RISC-V M-UNIT TESTBENCH (500+ CASES) =======
 # =====================================================
 #  TEST COMPLETED
@@ -59,4 +106,6 @@
 # =====================================================
 #  RESULT: SUCCESS
 # ** Note: $finish    : tb.sv(131)
-#    Time: 114675 ns  Iteration: 1  Instance: /tb
+#    Time: 120055 ns  Iteration: 1  Instance: /tb
+# End time: 23:36:05 on Jan 07,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 4
