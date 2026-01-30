@@ -1,59 +1,68 @@
 `include "uvm_macros.svh"
 import uvm_pkg::*;
-import imem_pkg::*; // Import gói UVM ta vừa viết
+import imem_pkg::*;
+import memory_pkg::*;
 
-// Định nghĩa Interface
-interface imem_if (input logic clk);
-    logic        rst;
-    logic [31:0] addr;
-    logic [31:0] instr;
+// ---------------------------------------------------------
+// Interface (Active High Reset)
+// ---------------------------------------------------------
+interface imem_if (input logic clk_i);
+    logic        rst_i;   // Active High Reset
+    logic        req_i;   
+    logic [31:0] addr_i;  
+    logic [31:0] instr_o; 
 endinterface
 
 module tb_top;
     logic clk;
     
-    // Tạo Clock
+    // Clock Gen
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
 
-    // Instance Interface
+    // Interface Instance
     imem_if vif(clk);
 
-    // Instance DUT (Device Under Test)
+    // DUT Instance
     imem #(
         .HEX_FILE("program.hex"),
-	.MEM_SIZE(4096)
+        .MEM_SIZE(4096)
     ) dut (
         .clk_i   (clk),
-        .rst_i  (vif.rst),
-        .addr_i  (vif.addr),
-        .instr_o (vif.instr)
+        .rst_i   (vif.rst_i), // <--- SỬA LẠI DÒNG NÀY (rst_ni -> rst_i)
+        .req_i   (vif.req_i), 
+        .addr_i  (vif.addr_i),
+        .instr_o (vif.instr_o)
     );
 
-    // Block khởi chạy UVM
+    // --- Reset Logic (Active High: 1 là Reset, 0 là Chạy) ---
     initial begin
-        vif.rst = 1;
-	vif.addr =0;
-	#20;
-        vif.rst = 0;
-	end
+        // 1. Khởi tạo
+        vif.rst_i  = 0; 
+        vif.req_i  = 0;
+        vif.addr_i = 0;
 
-        // Đăng ký Interface vào Config DB để Driver/Monitor tìm thấy
-	initial begin
-	uvm_config_db#(virtual imem_if)::set(null, "*", "vif", vif);
+        // 2. Kích hoạt Reset (Bật lên 1)
+        #10;
+        vif.rst_i  = 1; // RESET ON
+        #20;
+        vif.rst_i  = 0; // RESET OFF (Chạy)
+    end
 
-        // Chạy Test
+    // UVM Start
+    initial begin
+        uvm_config_db#(virtual imem_if)::set(null, "*", "vif", vif);
         run_test("imem_basic_test");
     end
-	initial begin
-    // In tiêu đề cột cho dễ nhìn
-    $display("Time  | Reset | Address    | Instruction");
-    $display("------+-------+------------+------------");
-    
-    // $monitor tự động chạy khi bất kỳ signal nào trong danh sách thay đổi
-    $monitor("%4t  |   %b   | %h   | %h", 
-             $time, vif.rst, vif.addr, vif.instr);
-end
+
+    // Debug Monitor
+    initial begin
+        $display("Time  | Rst_i | Req | Address    | Instruction");
+        $display("------+-------+-----+------------+------------");
+        $monitor("%4t  |   %b   |  %b  | %h   | %h", 
+                 $time, vif.rst_i, vif.req_i, vif.addr_i, vif.instr_o);
+    end
+
 endmodule
